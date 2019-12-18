@@ -25,5 +25,8 @@ exitstatus() {
 export PS1='\[$(exitstatus)\]>\[\e[39m\] '
 export PS2="> "
 
+# Add ./.local/bin to PATH to simplify execution of pip-installed packages
+PATH="${HOME}/.local/bin:${PATH}"
+
 # NOTE: Add your customizations to ./.bashrc-personal.
 source ~/.bashrc-personal
