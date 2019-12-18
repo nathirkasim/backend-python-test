@@ -1,5 +1,6 @@
 **/__pycache__
 .bash_history
+.bashrc-personal
 .cache
 .config
 .coverage
