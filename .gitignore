@@ -1,0 +1,7 @@
+**/__pycache__
+.bash_history
+.cache
+.config
+.coverage
+.local
+.pylint.d
