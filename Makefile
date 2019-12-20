@@ -1,26 +1,42 @@
 # The following args have been provided default values but can be overriden
 # from the CLI by specifying those variables with the override values.
-BASE_IMAGE=python:3.8.0-slim
-COMMAND=echo test; exit 1
-HOST=127.0.0.1
-IMAGE_NAME=backend-django
-IMAGE_TAG=0.1.0
-PORT=8121
 
-DOCKER_CONTAINER_BASE_IMAGE?=${BASE_IMAGE}
-DOCKER_CONTAINER_COMMAND=bash
-DOCKER_CONTAINER_HOMEDIR=/home/${DOCKER_CONTAINER_USERNAME}
-DOCKER_CONTAINER_IMAGE=python:3.8.0-slim
-DOCKER_CONTAINER_PORT?=8000 # Whatever the Django default port is
-DOCKER_CONTAINER_USERNAME=developer
-DOCKER_HOST_ADDRESS?=${HOST}
-DOCKER_HOST_HOMEDIR=${PWD}
-DOCKER_HOST_PORT?=${PORT}
+# Base image (as FROM) for all project images
+# Try to use official images as much as possible.
+# https://docs.docker.com/docker-hub/official_images/
+BASE_IMAGE ?= python:3.8.0-slim
 
-DOCKER_IMAGE?=${IMAGE_NAME}
-DOCKER_TAG?=${IMAGE_TAG}
+# Default command of `make run` task unless otherwise specified by user
+# Leave this as-is to send a friendly reminder to users when they have
+# forgotten to set this variable on a `make run` call.
+COMMAND ?= echo -e "\033[1;31mCOMMAND is undefined.\033[0m"
 
-DOCKER_ARGS=\
+# Host address for port mapping
+# Don't use 0.0.0.0 as this opens up your machine,
+HOST ?= 127.0.0.1
+
+# Port on host for port mapping to image
+PORT ?= 8121
+
+# Prefix for Docker images
+PROJECT ?= backend-starter-django
+
+# Version to use for tagging images.
+VERSION ?= 0.1.0
+
+DOCKER_CONTAINER_BASE_IMAGE = ${BASE_IMAGE}
+DOCKER_CONTAINER_HOMEDIR = /home/${DOCKER_CONTAINER_USERNAME}
+DOCKER_CONTAINER_PORT = 8000 # Whatever the Django default port is
+DOCKER_CONTAINER_USERNAME = developer
+
+DOCKER_HOST_ADDRESS = ${HOST}
+DOCKER_HOST_HOMEDIR = ${PWD}
+DOCKER_HOST_PORT = ${PORT}
+
+DOCKER_NAME = ${PROJECT}
+DOCKER_TAG = ${VERSION}
+
+DOCKER_ARGS = \
 	-e "API_BASE_URL=http://localhost:${DOCKER_HOST_PORT}" \
 	-e "HOME=${DOCKER_CONTAINER_HOMEDIR}" \
 	-e "PYTHONPATH=${DOCKER_CONTAINER_HOMEDIR}" \
@@ -29,28 +45,41 @@ DOCKER_ARGS=\
 	-v ${DOCKER_HOST_HOMEDIR}:${DOCKER_CONTAINER_HOMEDIR} \
 	-w ${DOCKER_CONTAINER_HOMEDIR} \
 
-nuke:
+# Cleans up the temporary files
+clean:
 	rm -rf .local .cache
 
+# Runs the command in the COMMAND var within the container
 run:
 	docker run \
 		${DOCKER_ARGS} \
 		--rm -it \
-		${DOCKER_CONTAINER_BASE_IMAGE} ${COMMAND}
+		${DOCKER_NAME}:${DOCKER_TAG}-base ${COMMAND}
 
 bash:
 	docker run \
 		${DOCKER_ARGS} \
 		--rm -it \
-		${DOCKER_CONTAINER_BASE_IMAGE} bash
+		${DOCKER_NAME}:${DOCKER_TAG}-base bash
 
-image:
+# Produce the base image based on base.Dockerfile
+base-image:
 	docker build \
 		--build-arg="DOCKER_BASE_IMAGE=${DOCKER_CONTAINER_BASE_IMAGE}" \
 		--no-cache \
 		--rm \
-		--tag=${DOCKER_IMAGE} \
-		--tag=${DOCKER_IMAGE}:${DOCKER_TAG} \
+		--tag=${DOCKER_NAME}:${DOCKER_TAG}-base \
+		-f base.Dockerfile \
 		.
 
-.PHONY: bash images nuke run
+# Produce the production image based on Dockerfile
+image:
+	docker build \
+		--build-arg="DOCKER_BASE_IMAGE=${DOCKER_NAME}:${DOCKER_TAG}-base" \
+		--no-cache \
+		--rm \
+		--tag=${DOCKER_NAME} \
+		--tag=${DOCKER_NAME}:${DOCKER_TAG} \
+		.
+
+.PHONY: base-image bash clean image run
