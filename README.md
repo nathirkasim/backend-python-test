@@ -62,23 +62,19 @@ to install the Django framework and its dependencies for example.
 
 > Operating a Docker container as root is considered a bad practice, hence the
 > design choice to run the container as a user which matches the uid and gid on
-> the host thus resulting to IO to mounted volumes being performed against the
-> uid and gid from the user on the host who started the container (yourself).
-> This removes the need for the occasional recursive chown on your work
-> directory on some Linux workstations.
+> the host thus resulting in read and write operations to mounted volumes being
+> performed against the uid and gid from the user on the host who started the
+> container (being yourself). This removes the need for the occasional
+> recursive chown on your work directory on some Linux workstations.
 
 See the [Django install page][pip-install] for more information regarding the
 installation of the framework but keep the constraints of the Docker
 environment in mind when executing commands referenced in that document.
 
-
 > Note that the `--user` flag is used to instruct pip to install packages
 > within the user's home directory i.e.: `~/.local` which avoid problems that
 > would be caused by pip attempting to install packages to paths that require
-> root permissions. Since operating a container as a root user is generally
-> considered a bad practice, we would recommend to stick to the convention of
-> installing packages into the user's home directories.
-
+> root permissions.
 
 As customary with pip, you can produce a dump of all installed packages to the
 requirements.txt file by running `pip freeze > requirements.txt` as in
