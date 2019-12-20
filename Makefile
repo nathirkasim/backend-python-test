@@ -73,7 +73,7 @@ base-image:
 		.
 
 # Produce the production image based on Dockerfile
-image:
+production-image:
 	docker build \
 		--build-arg="DOCKER_BASE_IMAGE=${DOCKER_NAME}:${DOCKER_TAG}-base" \
 		--no-cache \
@@ -82,4 +82,4 @@ image:
 		--tag=${DOCKER_NAME}:${DOCKER_TAG} \
 		.
 
-.PHONY: base-image bash clean image run
+.PHONY: base-image bash clean production-image run
