@@ -25,7 +25,8 @@ The base image for this project is defined in base.Dockerfile and can be built
 by running
 
 ```bash
-make base-image```
+make base-image
+```
 
 where the `BASE_IMAGE` defined in the Makefile defines the value used by the
 `FROM` command in the Dockerfile.
