@@ -9,5 +9,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ARG GID=20000
 ARG UID=20000
-RUN groupadd -g ${GID} appgroup && useradd -u ${UID} -g ${GID} appuser
+ARG GECOS=",,,,"
+RUN \
+  addgroup \
+    --gid ${GID} \
+    appgroup \
+  && \
+  adduser \
+    --uid ${UID} \
+    --gecos ${GECOS} \
+    --gid ${GID} \
+    --disabled-password \
+    --disabled-login \
+    appuser
 USER ${UID}:${GID}
