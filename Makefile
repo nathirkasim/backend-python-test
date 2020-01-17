@@ -41,8 +41,9 @@ DOCKER_ARGS = \
 	-e "PYTHONPATH=${DOCKER_CONTAINER_HOME_PATH}" \
 	-p ${DOCKER_HOST_ADDRESS}:${DOCKER_HOST_PORT}:${DOCKER_CONTAINER_PORT} \
 	-u `id -u`:`id -g` \
-	-v ${DOCKER_HOST_PROJECT_PATH}:${DOCKER_CONTAINER_HOME_PATH} \
-	-w ${DOCKER_CONTAINER_HOME_PATH} \
+	-v ${DOCKER_HOST_PROJECT_PATH}/home:${DOCKER_CONTAINER_HOME_PATH} \
+	-v ${DOCKER_HOST_PROJECT_PATH}:/tmp/app/src \
+	-w /tmp/app/src \
 
 # Cleans up the temporary files
 clean:
