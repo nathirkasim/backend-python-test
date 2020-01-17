@@ -22,14 +22,14 @@ exitstatus() {
   fi
 }
 
-export PS1='\[$(exitstatus)\]>\[\e[39m\] '
+export PS1="\[$(exitstatus)\]>\[\e[0m\] "
 export PS2="> "
 
 # Create venv if not already created
 if [[ ! (-d .venv && -f .venv/bin/activate) ]]; then
   python -m venv .venv
 else
-  echo -e "Using a previously created venv at ./.venv"
+  echo -e "\e[94mUsing a previously created venv at \e[4m./.venv\e[0m"
 fi
 
 source .venv/bin/activate
@@ -38,5 +38,5 @@ source .venv/bin/activate
 if [[ -f ~/.bashrc-personal ]]; then
   source ~/.bashrc-personal
 else
-  echo -e "No personal bashrc found at ~/.bashrc-personal"
+  echo -e "\e[94mNo personal bashrc found at \e[4m~/.bashrc-personal\e[0m"
 fi
