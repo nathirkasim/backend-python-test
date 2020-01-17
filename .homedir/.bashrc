@@ -25,8 +25,18 @@ exitstatus() {
 export PS1='\[$(exitstatus)\]>\[\e[39m\] '
 export PS2="> "
 
-# Add ./.local/bin to PATH to simplify execution of pip-installed packages
-PATH="${HOME}/.local/bin:${PATH}"
+# Create venv if not already created
+if [[ ! (-d .venv && -f .venv/bin/activate) ]]; then
+  python -m venv .venv
+else
+  echo -e "Using a previously created venv at ./.venv"
+fi
 
-# NOTE: Add your customizations to ./.bashrc-personal.
-source ~/.bashrc-personal
+source .venv/bin/activate
+
+# Load personal Bash config from ./.bashrc-personal. if available
+if [[ -f ~/.bashrc-personal ]]; then
+  source ~/.bashrc-personal
+else
+  echo -e "No personal bashrc found at ~/.bashrc-personal"
+fi
