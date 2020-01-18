@@ -1,6 +1,8 @@
 **/__pycache__
-.bash_history
-.bashrc-personal
+
+.homedir/*
+!.homedir/.bashrc
+
 .cache
 .config
 .coverage
