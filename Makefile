@@ -6,11 +6,6 @@
 # https://docs.docker.com/docker-hub/official_images/
 BASE_IMAGE ?= python:3.8.0-slim
 
-# Default command of `make run` task unless otherwise specified by user
-# Leave this as-is to send a friendly reminder to users when they have
-# forgotten to set this variable on a `make run` call.
-COMMAND ?= echo -e "\033[1;31mCOMMAND is undefined.\033[0m"
-
 # Host address for port mapping
 # Don't use 0.0.0.0 as this opens up your machine,
 HOST ?= 127.0.0.1
@@ -50,13 +45,6 @@ DOCKER_ARGS = \
 # Cleans up the temporary files
 clean:
 	rm -rf .local .cache
-
-# Runs the command in the COMMAND var within the container
-run:
-	docker run \
-		${DOCKER_ARGS} \
-		--rm -it \
-		${DOCKER_NAME}:${DOCKER_TAG}-base ${COMMAND}
 
 bash:
 	docker run \
