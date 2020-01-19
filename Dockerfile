@@ -46,6 +46,10 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 COPY --chown=${UID}:${GID} --from=compile-image /opt/venv /opt/venv
 
+ARG PROJECT
+ENV PROJECT=${PROJECT}
+WORKDIR /opt/${PROJECT}
+
 # Explicitly listing all files to be copied as opposed to listing non-wanted
 # files in a .dockerignore file makes it easier to examine (e.g.: during
 # code-reviews) which files will be shipped with builds. Relying on
@@ -55,6 +59,4 @@ COPY --chown=${UID}:${GID} --from=compile-image /opt/venv /opt/venv
 # and avoid using it as the primary means to keep files from ending up in
 # production images.
 # Prefer COPY of ADD
-ARG PROJECT
-
 COPY --chown=${UID}:${GID} mysite /opt/${PROJECT}/mysite
