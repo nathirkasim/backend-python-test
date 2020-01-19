@@ -37,12 +37,14 @@ DOCKER_TAG = ${VERSION}
 
 DOCKER_ARGS = \
 	-e "API_BASE_URL=http://localhost:${DOCKER_HOST_PORT}" \
+	-e "PROJECT=${PROJECT}" \
 	-e "HOME=${DOCKER_CONTAINER_HOME_PATH}" \
 	-p ${DOCKER_HOST_ADDRESS}:${DOCKER_HOST_PORT}:${DOCKER_CONTAINER_PORT} \
 	-u `id -u`:`id -g` \
+	-v ${DOCKER_HOST_PROJECT_PATH}/.config:/etc/opt/${PROJECT} \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.homedir:${DOCKER_CONTAINER_HOME_PATH} \
-	-v ${DOCKER_HOST_PROJECT_PATH}:${DOCKER_CONTAINER_HOME_PATH}/app \
-	-w ${DOCKER_CONTAINER_HOME_PATH}/app
+	-v ${DOCKER_HOST_PROJECT_PATH}:/opt/${PROJECT} \
+	-w /opt/${PROJECT}
 
 # Cleans up the temporary files
 clean:
