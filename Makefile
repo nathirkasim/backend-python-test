@@ -43,6 +43,7 @@ DOCKER_ARGS = \
 	-u `id -u`:`id -g` \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.config:/etc/opt/${PROJECT} \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.homedir:${DOCKER_CONTAINER_HOME_PATH} \
+	-v ${DOCKER_HOST_PROJECT_PATH}/.venv:/etc/opt/venv \
 	-v ${DOCKER_HOST_PROJECT_PATH}:/opt/${PROJECT} \
 	-w /opt/${PROJECT}
 
