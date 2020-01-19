@@ -1,20 +1,50 @@
 # Do not provide a default base image in order to make this definition explicit
 ARG DOCKER_BASE_IMAGE
-FROM ${DOCKER_BASE_IMAGE}
+
+
+FROM ${DOCKER_BASE_IMAGE} AS compile-image
+
+# Install dependencies for psycopg2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    python-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Define environment vars for venv and produce the venv directory
-ENV VIRTUAL_ENV=/home/appuser/venv
-RUN python -m venv /home/appuser/venv
+ENV VIRTUAL_ENV=/opt/venv
+RUN python -m venv /opt/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Create the source directory, set appuser's ~ as the working path and install
-# the dependencies listed in requirements.txt
-RUN mkdir /home/appuser/src
-WORKDIR /home/appuser
-COPY requirements.txt src/.
-RUN pip install -r src/requirements.txt
+WORKDIR /tmp/app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# TODO: Uninstall dependencies that were only needed for development
+
+FROM ${DOCKER_BASE_IMAGE}
+
+ARG GID=20000
+ARG UID=20000
+ARG GECOS=",,,,"
+RUN \
+  addgroup \
+    --gid ${GID} \
+    appgroup \
+  && \
+  adduser \
+    --uid ${UID} \
+    --gecos ${GECOS} \
+    --gid ${GID} \
+    --disabled-password \
+    --disabled-login \
+    appuser
+USER ${UID}:${GID}
+
+# Define environment vars for venv and produce the venv directory
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+COPY --chown=${UID}:${GID} --from=compile-image /opt/venv /opt/venv
 
 # Explicitly listing all files to be copied as opposed to listing non-wanted
 # files in a .dockerignore file makes it easier to examine (e.g.: during
@@ -27,4 +57,4 @@ RUN pip install -r src/requirements.txt
 # Prefer COPY of ADD
 ARG PROJECT
 
-COPY mysite /opt/$PROJECT}/mysite
+COPY --chown=${UID}:${GID} mysite /opt/${PROJECT}/mysite

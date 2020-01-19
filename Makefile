@@ -61,22 +61,11 @@ bash:
 	docker run \
 		${DOCKER_ARGS} \
 		--rm -it \
-		${DOCKER_NAME}:${DOCKER_TAG}-base bash
+		${DOCKER_NAME}:${DOCKER_TAG} bash
 
-# Produce the base image based on base.Dockerfile
-base-image:
+image:
 	docker build \
 		--build-arg="DOCKER_BASE_IMAGE=${DOCKER_CONTAINER_BASE_IMAGE}" \
-		--no-cache \
-		--rm \
-		--tag=${DOCKER_NAME}:${DOCKER_TAG}-base \
-		-f base.Dockerfile \
-		.
-
-# Produce the production image based on Dockerfile
-production-image:
-	docker build \
-		--build-arg="DOCKER_BASE_IMAGE=${DOCKER_NAME}:${DOCKER_TAG}-base" \
 		--build-arg="PROJECT=${PROJECT}" \
 		--no-cache \
 		--rm \
@@ -84,4 +73,5 @@ production-image:
 		--tag=${DOCKER_NAME}:${DOCKER_TAG} \
 		.
 
-.PHONY: base-image bash clean production-image run
+.PHONY: image bash clean run
+# vi: set nowrap:
