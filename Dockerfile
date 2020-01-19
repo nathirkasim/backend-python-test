@@ -25,5 +25,6 @@ RUN pip install -r src/requirements.txt
 # and avoid using it as the primary means to keep files from ending up in
 # production images.
 # Prefer COPY of ADD
-ARG APP_PACKAGE
-COPY ${APP_PACKAGE} /home/appuser/src/${APP_PACKAGE}
+ARG PROJECT
+
+COPY mysite /opt/$PROJECT}/mysite

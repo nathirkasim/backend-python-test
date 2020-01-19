@@ -77,6 +77,7 @@ base-image:
 production-image:
 	docker build \
 		--build-arg="DOCKER_BASE_IMAGE=${DOCKER_NAME}:${DOCKER_TAG}-base" \
+		--build-arg="PROJECT=${PROJECT}" \
 		--no-cache \
 		--rm \
 		--tag=${DOCKER_NAME} \
