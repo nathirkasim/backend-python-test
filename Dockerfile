@@ -7,18 +7,28 @@ FROM ${DOCKER_BASE_IMAGE} AS compile-image
 # Install dependencies for psycopg2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    curl \
     libpq-dev \
     python-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Define environment vars for venv and produce the venv directory
+# Install Poetry to $POETRY_HOME and allow all to execute binaries
+# https://python-poetry.org/docs/#introduction
+ENV POETRY_HOME=/opt/poetry
+RUN curl -sSL \
+  https://raw.githubusercontent.com/python-poetry/poetry/1.0.3/get-poetry.py \
+  > /tmp/get-poetry.py && \
+  python /tmp/get-poetry.py && \
+  chmod -R a+x ${POETRY_HOME}/bin
+
+# Define environment vars for venv and initialize a venv
 ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="$VIRTUAL_ENV/bin:/opt/poetry/bin/:$PATH"
 RUN python -m venv /opt/venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /tmp/app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+COPY pyproject.toml poetry.lock /tmp/app/
+RUN poetry install
 
 
 FROM ${DOCKER_BASE_IMAGE}
@@ -41,10 +51,12 @@ RUN \
 USER ${UID}:${GID}
 
 # Define environment vars for venv and produce the venv directory
+ENV POETRY_HOME=/opt/poetry
 ENV VIRTUAL_ENV=/opt/venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV PATH="$VIRTUAL_ENV/bin:/opt/poetry/bin:$PATH"
 
 COPY --chown=${UID}:${GID} --from=compile-image /opt/venv /opt/venv
+COPY --chown=${UID}:${GID} --from=compile-image /opt/poetry /opt/poetry
 
 ARG PROJECT
 ENV PROJECT=${PROJECT}
@@ -59,4 +71,4 @@ WORKDIR /opt/${PROJECT}
 # and avoid using it as the primary means to keep files from ending up in
 # production images.
 # Prefer COPY of ADD
-COPY --chown=${UID}:${GID} mysite /opt/${PROJECT}/mysite
+COPY --chown=${UID}:${GID} . /opt/${PROJECT}

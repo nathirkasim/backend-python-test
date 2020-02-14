@@ -26,13 +26,13 @@ export PS1="\[$(exitstatus)\]>\[\e[0m\] "
 export PS2="> "
 
 # Create venv if not already created
-if [[ ! (-d .venv && -f .venv/bin/activate) ]]; then
-  python -m venv .venv
+if [[ ! (-d ${VIRTUAL_ENV} && -f ${VIRTUAL_ENV}/bin/activate) ]]; then
+  python -m venv ${VIRTUAL_ENV}
 else
-  echo -e "\e[94mUsing a previously created venv at \e[4m./.venv\e[0m"
+  echo -e "\e[94mUsing previously created venv at \e[4m${VIRTUAL_ENV}\e[0m"
 fi
 
-source .venv/bin/activate
+source ${VIRTUAL_ENV}/bin/activate
 
 # Load personal Bash config from ./.bashrc-personal. if available
 if [[ -f ~/.bashrc-personal ]]; then
