@@ -1,6 +1,13 @@
 # The following args have been provided default values but can be overriden
 # from the CLI by specifying those variables with the override values.
 
+# The path to the shippable part of your application.
+# The shippable part of your application should contain manifest files
+# (requirements.txt in case of pip, pyproject.toml and poetry.lock in case of
+# Poetry) and the actual source that you will want to run inside of your
+# container.
+APP_PATH ?= .
+
 # Base image (as FROM) for all project images
 # Try to use official images as much as possible.
 # https://docs.docker.com/docker-hub/official_images/
@@ -19,8 +26,8 @@ PROJECT ?= backend-starter-django
 # Version to use for tagging images.
 VERSION ?= 0.1.0
 
-DOCKER_APP_PATH ?= .
 DOCKER_CACHE_FLAG ?= "--no-cache"
+
 DOCKER_CONTAINER_BASE_IMAGE = ${BASE_IMAGE}
 DOCKER_CONTAINER_HOME_PATH = /home/appuser
 DOCKER_CONTAINER_PORT = 8000 # Whatever the Django default port is
@@ -64,7 +71,7 @@ image:
 		--rm \
 		--tag=${DOCKER_NAME} \
 		--tag=${DOCKER_NAME}:${DOCKER_TAG} \
-		${DOCKER_APP_PATH}
+		${APP_PATH}
 
 .PHONY: image bash clean run
 # vi: set nowrap:

@@ -25,8 +25,9 @@ The base image for this project is defined in base.Dockerfile and can be built
 by running
 
 ```bash
-make base-image
+make image
 ```
+
 
 where the `BASE_IMAGE` defined in the Makefile defines the value used by the
 `FROM` command in the Dockerfile.
@@ -34,21 +35,75 @@ where the `BASE_IMAGE` defined in the Makefile defines the value used by the
 Edit the base.Dockerfile as necessary to ensure that the common dependencies
 are installed.
 
+#### Caching
+
+In case you want to avoid rebuilding all your images from scratch, prefix image
+makerule calls with `DOCKER_CACHE_FLAG=""` in order to clear the default
+`--no-cache` flag and thus allow caching in the docker build process.
+
+```
+DOCKER_CACHE_FLAG="" make image
+```
+
+#### Application Path
+
+In case the shippable part of your application is not equal to the root
+directory of this repository you may use `APP_PATH` which defaults to `.` (the
+project root directory) to specify the path of your application.
+
+
+Note that a directory tree for a project structured as:
+
+```
+.
+├── Dockerfile
+├── install.sh
+├── LICENSE
+├── Makefile
+├── NOTES.md
+├── poetry-demo
+│   ├── poetry_demo
+│   ├── poetry_demo.egg-info
+│   ├── poetry.lock
+│   ├── pyproject.toml
+│   ├── README.rst
+│   └── tests
+└── README.md
+```
+
+could be built by running `APP_PATH=poetry-demo make image`.
+
+> For the sake of cleanliness, we would recommend to keep application source
+> and the relevant dependecies manifests within a subdirectory of the project
+> root directory as this design keeps mounting of directories into the Docker
+> container relatively easy to reason about.
+
+A project structured as:
+
+```
+.
+├── Dockerfile
+├── install.sh
+├── LICENSE
+├── Makefile
+├── mysite
+│   ├── db.sqlite3
+│   ├── manage.py
+│   ├── mysite
+│   ├── polls
+│   └── templates
+├── NOTES.md
+└── requirements.txt
+```
+
+could be built by running `make image` since the `APP_PATH` defaults to the
+project root directory and we would need the dependencies manifest, being
+requirements.txt in this case, to be included for a build to succeed.
+
+
 ### Run commands
 To produce a development environment run `make bash` to pull the necessary
 Docker image and drop into a bash shell therein.
-
-For the sake of convenience, you can run individual commands that you would run
-within the bash shell by passing them through the COMMAND variable to the `run`
-task as demonstrated below:
-
-```bash
-make run COMMAND="python --version"
-```
-
-> The rest of this document uses the `make run` form to display commands for
-> simplicity's sake with the assumption that you understand that commands can
-> be entered directly into a bash session produced by `make bash`.
 
 ### Install packages with `pip`
 In order to run commands such as pip install commands to set up your
