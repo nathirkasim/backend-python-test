@@ -6,7 +6,7 @@
 # (requirements.txt in case of pip, pyproject.toml and poetry.lock in case of
 # Poetry) and the actual source that you will want to run inside of your
 # container.
-APP_PATH ?= .
+APP_PATH ?= ${PWD}
 
 # Base image (as FROM) for all project images
 # Try to use official images as much as possible.
@@ -48,21 +48,22 @@ DOCKER_ARGS = \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.config:/etc/opt/${PROJECT} \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.homedir:${DOCKER_CONTAINER_HOME_PATH} \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.venv:/opt/venv \
-	-v ${DOCKER_HOST_PROJECT_PATH}:/opt/${PROJECT} \
+	-v ${APP_PATH}:/opt/${PROJECT} \
 	-w /opt/${PROJECT}
 
 # Cleans up the temporary files
 clean:
-	rm -rf .local .cache
+	rm -rf .venv .homedir/.cache
 
 bash:
 	@mkdir -p .venv
 	@docker run \
 		${DOCKER_ARGS} \
 		--rm -it \
-		${DOCKER_NAME}:${DOCKER_TAG} bash
+		-w ${APP_PATH} \
+		${DOCKER_NAME}:${DOCKER_TAG}-dev bash
 
-image:
+prod-image:
 	@docker build \
 		${DOCKER_CACHE_FLAG} \
 		--build-arg="DOCKER_BASE_IMAGE=${DOCKER_CONTAINER_BASE_IMAGE}" \
@@ -71,7 +72,18 @@ image:
 		--rm \
 		--tag=${DOCKER_NAME} \
 		--tag=${DOCKER_NAME}:${DOCKER_TAG} \
+		--target=prod-image \
 		${APP_PATH}
 
-.PHONY: image bash clean run
+dev-image:
+	@docker build \
+		${DOCKER_CACHE_FLAG} \
+		--build-arg="DOCKER_BASE_IMAGE=${DOCKER_CONTAINER_BASE_IMAGE}" \
+		--file=Dockerfile \
+		--rm \
+		--tag=${DOCKER_NAME}:${DOCKER_TAG}-dev \
+		--target=dev-image \
+		${APP_PATH}
+
+.PHONY: prod-image dev-image bash clean
 # vi: set nowrap:
