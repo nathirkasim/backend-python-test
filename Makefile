@@ -6,7 +6,7 @@
 # (requirements.txt in case of pip, pyproject.toml and poetry.lock in case of
 # Poetry) and the actual source that you will want to run inside of your
 # container.
-APP_PATH ?= ${PWD}
+APP_PATH ?= .
 
 # Base image (as FROM) for all project images
 # Try to use official images as much as possible.
@@ -48,7 +48,7 @@ DOCKER_ARGS = \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.config:/etc/opt/${PROJECT} \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.homedir:${DOCKER_CONTAINER_HOME_PATH} \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.venv:/opt/venv \
-	-v ${APP_PATH}:/tmp/${PROJECT} \
+	-v `realpath ${APP_PATH}`:/tmp/${PROJECT} \
 	-w /tmp/${PROJECT}
 
 # Cleans up the temporary files
