@@ -48,8 +48,8 @@ DOCKER_ARGS = \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.config:/etc/opt/${PROJECT} \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.homedir:${DOCKER_CONTAINER_HOME_PATH} \
 	-v ${DOCKER_HOST_PROJECT_PATH}/.venv:/opt/venv \
-	-v ${APP_PATH}:/opt/${PROJECT} \
-	-w /opt/${PROJECT}
+	-v ${APP_PATH}:/tmp/${PROJECT} \
+	-w /tmp/${PROJECT}
 
 # Cleans up the temporary files
 clean:
@@ -79,6 +79,7 @@ dev-image:
 	@docker build \
 		${DOCKER_CACHE_FLAG} \
 		--build-arg="DOCKER_BASE_IMAGE=${DOCKER_CONTAINER_BASE_IMAGE}" \
+		--build-arg="PROJECT=${PROJECT}" \
 		--file=Dockerfile \
 		--rm \
 		--tag=${DOCKER_NAME}:${DOCKER_TAG}-dev \

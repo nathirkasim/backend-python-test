@@ -37,12 +37,12 @@ ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="$VIRTUAL_ENV/bin:/opt/poetry/bin/:$PATH"
 RUN python -m venv /opt/venv
 
-ARG PROJECT
+ARG PROJECT=app
 ENV PROJECT=${PROJECT}
-WORKDIR /opt/${PROJECT}
+WORKDIR /tmp/${PROJECT}
 
 # Copy Python dependency manifests and install listed dependencies
-COPY pyproject.toml poetry.lock /opt/${PROJECT}/
+COPY pyproject.toml poetry.lock /tmp/${PROJECT}/
 RUN poetry install --no-dev
 
 
@@ -70,7 +70,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 COPY --chown=${UID}:${GID} --from=dev-image /opt/venv /opt/venv
 
-ARG PROJECT
+ARG PROJECT=app
 ENV PROJECT=${PROJECT}
 WORKDIR /opt/${PROJECT}
 
