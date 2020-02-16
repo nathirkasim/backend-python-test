@@ -56,7 +56,7 @@ clean:
 	rm -rf .venv .homedir/.cache
 
 bash:
-	@mkdir -p .venv
+	@mkdir -p .config .venv
 	@docker run \
 		${DOCKER_ARGS} \
 		--rm -it \
