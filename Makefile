@@ -60,7 +60,6 @@ bash:
 	@docker run \
 		${DOCKER_ARGS} \
 		--rm -it \
-		-w ${APP_PATH} \
 		${DOCKER_NAME}:${DOCKER_TAG}-dev bash
 
 prod-image:
