@@ -53,10 +53,10 @@ DOCKER_ARGS = \
 
 # Cleans up the temporary files
 clean:
-	rm -rf .venv .homedir/.cache
+	@rm -rf .homedir/.cache .venv
 
 bash:
-	@mkdir -p .config .venv
+	@mkdir -p .config .venv ${APP_PATH}
 	@docker run \
 		${DOCKER_ARGS} \
 		--rm -it \
