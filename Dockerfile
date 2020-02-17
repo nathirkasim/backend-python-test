@@ -85,3 +85,8 @@ WORKDIR /opt/${PROJECT}
 # images mean for deployment.
 # Prefer COPY over ADD
 COPY --chown=${UID}:${GID} . /opt/${PROJECT}/
+
+# Start service
+EXPOSE 8000
+ENTRYPOINT ["gunicorn"]
+CMD [ "--bind=0.0.0.0:8000", "--worker-class=sanic.worker.GunicornWorker", "sanic_openapi_example.main:app" ]
