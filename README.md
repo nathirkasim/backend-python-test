@@ -1,8 +1,8 @@
-# Python Django Backend Starter
-This is a starter project for a Django backend to get you started a little bit
-faster. Replace this description for a description that is suitable for your
-project, but keep the Usage section in place to inform other developers and
-your future self how to use this project.
+# Docker Python Application Template
+This template for a Python application packaged into a Docker container follows
+several best practices in order to result to production containers that:
+- uses non-root users
+- contains only compilation output (and not development tooling)
 
 ## Usage
 This repository uses Docker images to simplify development and deployment of
@@ -99,7 +99,8 @@ A project structured as:
 
 could be built by running `make prod-image` since the `APP_PATH` defaults to
 the project root directory and we would need the dependencies manifest, being
-requirements.txt in this case, to be included for a build to succeed.
+requirements.txt in this case which is located at the project root, to be
+included for a build to succeed.
 
 
 ### Run commands
