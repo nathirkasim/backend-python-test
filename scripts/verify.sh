@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# PHP2Shell Test Repository Integrity and Configuration Verification Script
+# TigerGate PHP2Shell Test Repository Integrity and Verification Script
 #
-# PURPOSE:
-# Performs harmless local checks to verify that repository structure, JSON
-# metadata, CVE references, and Docker configurations are intact and valid.
+# CHECKS PERFORMED:
+# 1. Required repository files exist (README, Dockerfiles, compose, fixtures, scripts).
+# 2. Docker is available on the host environment.
+# 3. PHP runtime versions are configured and distinct between vulnerable & patched.
+# 4. Expected CVE identifiers (CVE-2026-109618, CVE-2026-109619) are documented.
+# 5. TigerGate agent status is checked (if installed).
 #
-# NOTE:
-# This script does NOT execute exploits, does not make malicious requests,
-# and does NOT simulate or declare a scanner finding. Actual vulnerability
-# detection requires running your security scanner against the artifacts.
+# CRITICAL RULE:
+# This script does NOT claim TigerGate or any scanner detected a CVE without
+# actual scan output. It validates test fixture and configuration readiness.
 # ==============================================================================
 
 set -euo pipefail
@@ -25,13 +27,12 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}================================================================${NC}"
-echo -e "${BLUE}  PHP2Shell Vulnerability Detection Test: Integrity Verifier   ${NC}"
+echo -e "${BLUE}     TigerGate PHP2Shell CVE Detection Test: Verifier           ${NC}"
 echo -e "${BLUE}================================================================${NC}"
 echo ""
 
 ERRORS=0
 
-# Helper function to validate file existence
 check_file() {
     local file_path="$1"
     local relative_path="${file_path#$REPO_ROOT/}"
@@ -43,116 +44,111 @@ check_file() {
     fi
 }
 
-# Helper function to validate JSON syntax
 validate_json() {
     local json_file="$1"
     local relative_path="${json_file#$REPO_ROOT/}"
     if command -v jq >/dev/null 2>&1; then
         if jq empty "$json_file" >/dev/null 2>&1; then
-            echo -e "  [${GREEN}✓${NC}] Valid JSON syntax: ${relative_path}"
+            echo -e "  [${GREEN}✓${NC}] Valid JSON: ${relative_path}"
         else
-            echo -e "  [${RED}✗${NC}] Invalid JSON syntax: ${relative_path}"
+            echo -e "  [${RED}✗${NC}] Invalid JSON: ${relative_path}"
             ERRORS=$((ERRORS + 1))
         fi
     elif command -v python3 >/dev/null 2>&1; then
         if python3 -m json.tool "$json_file" >/dev/null 2>&1; then
-            echo -e "  [${GREEN}✓${NC}] Valid JSON syntax (python3): ${relative_path}"
+            echo -e "  [${GREEN}✓${NC}] Valid JSON (python3): ${relative_path}"
         else
-            echo -e "  [${RED}✗${NC}] Invalid JSON syntax (python3): ${relative_path}"
+            echo -e "  [${RED}✗${NC}] Invalid JSON (python3): ${relative_path}"
             ERRORS=$((ERRORS + 1))
         fi
-    else
-        echo -e "  [${YELLOW}!${NC}] Neither jq nor python3 found; skipping JSON syntax check for ${relative_path}"
     fi
 }
 
 echo -e "${CYAN}1. Verifying repository file structure...${NC}"
 check_file "${REPO_ROOT}/README.md"
-check_file "${REPO_ROOT}/Dockerfile"
+check_file "${REPO_ROOT}/Dockerfile.vulnerable"
+check_file "${REPO_ROOT}/Dockerfile.patched"
 check_file "${REPO_ROOT}/docker-compose.yml"
 check_file "${REPO_ROOT}/composer.json"
-check_file "${REPO_ROOT}/.gitignore"
-check_file "${REPO_ROOT}/.dockerignore"
 check_file "${REPO_ROOT}/src/index.php"
-check_file "${REPO_ROOT}/fixtures/vulnerable-runtime.json"
-check_file "${REPO_ROOT}/fixtures/patched-runtime.json"
+check_file "${REPO_ROOT}/fixtures/expected-findings.json"
+check_file "${REPO_ROOT}/fixtures/test-matrix.json"
 check_file "${REPO_ROOT}/scripts/verify.sh"
+check_file "${REPO_ROOT}/scripts/scan-local.sh"
 echo ""
 
-echo -e "${CYAN}2. Validating JSON configuration and fixture files...${NC}"
+echo -e "${CYAN}2. Validating JSON configuration and metadata files...${NC}"
 validate_json "${REPO_ROOT}/composer.json"
-validate_json "${REPO_ROOT}/fixtures/vulnerable-runtime.json"
-validate_json "${REPO_ROOT}/fixtures/patched-runtime.json"
+validate_json "${REPO_ROOT}/fixtures/expected-findings.json"
+validate_json "${REPO_ROOT}/fixtures/test-matrix.json"
 echo ""
 
 echo -e "${CYAN}3. Inspecting configured PHP runtime versions...${NC}"
-DOCKERFILE_DEFAULT=$(grep -E "^ARG PHP_VERSION=" "${REPO_ROOT}/Dockerfile" | cut -d'=' -f2 || echo "Not found")
-COMPOSE_VULN=$(grep -A 5 "vulnerable-runtime:" "${REPO_ROOT}/docker-compose.yml" | grep "PHP_VERSION:" | awk '{print $2}' | tr -d '"' || echo "Not found")
-COMPOSE_PATCHED=$(grep -A 5 "patched-runtime:" "${REPO_ROOT}/docker-compose.yml" | grep "PHP_VERSION:" | awk '{print $2}' | tr -d '"' || echo "Not found")
+VULN_PHP=$(grep -E "^FROM " "${REPO_ROOT}/Dockerfile.vulnerable" | awk '{print $2}' || echo "Not found")
+PATCH_PHP=$(grep -E "^FROM " "${REPO_ROOT}/Dockerfile.patched" | awk '{print $2}' || echo "Not found")
 
-echo -e "  - Dockerfile default runtime:  ${YELLOW}${DOCKERFILE_DEFAULT}${NC}"
-echo -e "  - Compose vulnerable service:  ${YELLOW}${COMPOSE_VULN}${NC}"
-echo -e "  - Compose patched service:     ${YELLOW}${COMPOSE_PATCHED}${NC}"
+echo -e "  - Vulnerable configuration: ${YELLOW}${VULN_PHP}${NC}"
+echo -e "  - Patched configuration:    ${YELLOW}${PATCH_PHP}${NC}"
+
+if [[ "$VULN_PHP" != "$PATCH_PHP" && "$VULN_PHP" != "Not found" && "$PATCH_PHP" != "Not found" ]]; then
+    echo -e "  [${GREEN}✓${NC}] Distinct runtime configurations confirmed between vulnerable and patched test targets."
+else
+    echo -e "  [${RED}✗${NC}] Vulnerable and patched configurations must use distinct versions."
+    ERRORS=$((ERRORS + 1))
+fi
 echo ""
 
-echo -e "${CYAN}4. Checking documented CVE identifiers in fixtures and README...${NC}"
+echo -e "${CYAN}4. Checking documented CVE identifiers...${NC}"
 for cve in "CVE-2026-109618" "CVE-2026-109619"; do
-    if grep -q "$cve" "${REPO_ROOT}/README.md"; then
-        echo -e "  [${GREEN}✓${NC}] ${cve} documented in README.md"
+    if grep -q "$cve" "${REPO_ROOT}/README.md" && \
+       grep -q "$cve" "${REPO_ROOT}/fixtures/expected-findings.json" && \
+       grep -q "$cve" "${REPO_ROOT}/fixtures/test-matrix.json"; then
+        echo -e "  [${GREEN}✓${NC}] ${cve} documented across README.md and fixtures"
     else
-        echo -e "  [${RED}✗${NC}] ${cve} NOT found in README.md"
-        ERRORS=$((ERRORS + 1))
-    fi
-
-    if grep -q "$cve" "${REPO_ROOT}/fixtures/vulnerable-runtime.json"; then
-        echo -e "  [${GREEN}✓${NC}] ${cve} referenced in fixtures/vulnerable-runtime.json"
-    else
-        echo -e "  [${RED}✗${NC}] ${cve} NOT found in fixtures/vulnerable-runtime.json"
-        ERRORS=$((ERRORS + 1))
-    fi
-
-    if grep -q "$cve" "${REPO_ROOT}/fixtures/patched-runtime.json"; then
-        echo -e "  [${GREEN}✓${NC}] ${cve} referenced in fixtures/patched-runtime.json"
-    else
-        echo -e "  [${RED}✗${NC}] ${cve} NOT found in fixtures/patched-runtime.json"
+        echo -e "  [${RED}✗${NC}] ${cve} missing in documentation or fixtures"
         ERRORS=$((ERRORS + 1))
     fi
 done
 echo ""
 
-echo -e "${CYAN}5. Checking Docker environment prerequisites...${NC}"
+echo -e "${CYAN}5. Inspecting Docker environment...${NC}"
 if command -v docker >/dev/null 2>&1; then
-    DOCKER_VER=$(docker --version)
-    echo -e "  [${GREEN}✓${NC}] Docker installed: ${DOCKER_VER}"
+    echo -e "  [${GREEN}✓${NC}] Docker installed: $(docker --version)"
 else
-    echo -e "  [${YELLOW}!${NC}] Docker not installed on host (required only if running container tests locally)"
+    echo -e "  [${RED}✗${NC}] Docker is not installed on this host"
+    ERRORS=$((ERRORS + 1))
 fi
 
 if docker compose version >/dev/null 2>&1; then
-    COMPOSE_VER=$(docker compose version)
-    echo -e "  [${GREEN}✓${NC}] Docker Compose installed: ${COMPOSE_VER}"
+    echo -e "  [${GREEN}✓${NC}] Docker Compose installed: $(docker compose version)"
 else
-    echo -e "  [${YELLOW}!${NC}] Docker Compose not installed on host"
+    echo -e "  [${YELLOW}!${NC}] Docker Compose not detected"
+fi
+echo ""
+
+echo -e "${CYAN}6. Checking TigerGate scanner status...${NC}"
+if command -v tigergate-agent >/dev/null 2>&1; then
+    echo -e "  [${GREEN}✓${NC}] tigergate-agent detected: $(tigergate-agent version 2>/dev/null || which tigergate-agent)"
+    echo -e "      (Agent enrollment & telemetry mode. See scripts/scan-local.sh for scan workflow)"
+else
+    echo -e "  [${YELLOW}!${NC}] tigergate-agent CLI not found in PATH"
 fi
 echo ""
 
 echo -e "${BLUE}================================================================${NC}"
-echo -e "${BLUE}                    Test Configuration Summary                  ${NC}"
+echo -e "${BLUE}                     Configuration Summary                      ${NC}"
 echo -e "${BLUE}================================================================${NC}"
-echo -e "  Repository Name:         php2shell-security-test"
-echo -e "  Primary Language:        PHP"
-echo -e "  Test A (Vulnerable):     PHP 8.3.35 (Targeted for CVE-2026-109618, CVE-2026-109619)"
-echo -e "  Test B (Patched):        PHP 8.3.36 (Fixed reference control case)"
-echo -e "  Source Reference:        Datadog Security Labs (PHP2Shell disclosure)"
-echo -e "  Detection Scope:         Container Base Image / Runtime OS Scan"
-echo -e "  Repository SCA Scope:    Inconclusive for C runtime unless container aware"
+echo -e "  Vulnerable Target:   ${VULN_PHP}"
+echo -e "  Patched Target:      ${PATCH_PHP}"
+echo -e "  Target CVEs:         CVE-2026-109618, CVE-2026-109619"
+echo -e "  Repository SCA:      composer.json manifest present (runtime out of scope)"
+echo -e "  Container Testing:   Dockerfile.vulnerable & Dockerfile.patched ready"
 echo -e "${BLUE}----------------------------------------------------------------${NC}"
 
 if [[ $ERRORS -eq 0 ]]; then
-    echo -e "${GREEN}✓ All repository integrity checks passed successfully.${NC}"
-    echo -e "Ready for security scanner validation."
+    echo -e "${GREEN}✓ Verification completed with 0 errors. Repository is ready.${NC}"
     exit 0
 else
-    echo -e "${RED}✗ Verification encountered ${ERRORS} issue(s). Please review above.${NC}"
+    echo -e "${RED}✗ Verification encountered ${ERRORS} error(s). Please fix before scanning.${NC}"
     exit 1
 fi

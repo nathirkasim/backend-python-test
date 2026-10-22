@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "document_type": "expected_findings_specification",
+  "scanner_target": "TigerGate / Security Scanner Evaluation",
+  "notice": "This fixture defines expected security findings for evaluation purposes. It is NOT raw scanner output.",
+  "target_cves": [
+    {
+      "cve_id": "CVE-2026-109618",
+      "upstream_advisory": "GHSA-w8hw-w9fx-j79w",
+      "title": "Interrupted initialization after memory exhaustion (PHP hash table RCE)",
+      "cvss_v4_score": 9.2,
+      "severity": "CRITICAL",
+      "affected_releases": {
+        "8.2": "< 8.2.35",
+        "8.3": "< 8.3.36",
+        "8.4": "< 8.4.27",
+        "8.5": "< 8.5.12"
+      },
+      "fixed_releases": {
+        "8.2": "8.2.35",
+        "8.3": "8.3.36",
+        "8.4": "8.4.27",
+        "8.5": "8.5.12"
+      },
+      "reference_url": "https://securitylabs.datadoghq.com/articles/php2shell-critical-vulnerabilities-in-php/"
+    },
+    {
+      "cve_id": "CVE-2026-109619",
+      "upstream_advisory": "GHSA-6wmf-4rv5-p3rp",
+      "title": "Stale state crosses request boundaries (Use-After-Free RCE in upload progress / backtraces)",
+      "cvss_v4_score": 9.2,
+      "severity": "CRITICAL",
+      "affected_releases": {
+        "8.2": "< 8.2.35",
+        "8.3": "< 8.3.36",
+        "8.4": "< 8.4.27",
+        "8.5": "< 8.5.12"
+      },
+      "fixed_releases": {
+        "8.2": "8.2.35",
+        "8.3": "8.3.36",
+        "8.4": "8.4.27",
+        "8.5": "8.5.12"
+      },
+      "reference_url": "https://securitylabs.datadoghq.com/articles/php2shell-critical-vulnerabilities-in-php/"
+    }
+  ],
+  "expected_outcomes_by_modality": {
+    "vulnerable_container_image": {
+      "target_image": "php2shell-security-test:vulnerable (PHP 8.3.35)",
+      "expected_cve_2026_109618": "DETECTED",
+      "expected_cve_2026_109619": "DETECTED",
+      "evaluation_criterion": "A container-aware scanner with an up-to-date advisory feed must identify both CVEs based on the Alpine PHP 8.3.35 binary/package."
+    },
+    "patched_container_image": {
+      "target_image": "php2shell-security-test:patched (PHP 8.3.36)",
+      "expected_cve_2026_109618": "NOT_DETECTED",
+      "expected_cve_2026_109619": "NOT_DETECTED",
+      "evaluation_criterion": "Neither CVE should be reported. Any finding against PHP 8.3.36 represents a false positive."
+    },
+    "repository_manifest_sca": {
+      "target_manifest": "composer.json",
+      "expected_cve_2026_109618": "INCONCLUSIVE_OR_NOT_DETECTED",
+      "expected_cve_2026_109619": "INCONCLUSIVE_OR_NOT_DETECTED",
+      "evaluation_criterion": "Core PHP runtime vulnerabilities cannot be identified through Composer library dependencies alone. Absence of detection in manifest SCA reflects an architectural scope boundary, not a scanner flaw."
+    }
+  }
+}

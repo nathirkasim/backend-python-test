@@ -4,10 +4,8 @@ services:
   vulnerable-runtime:
     build:
       context: .
-      dockerfile: Dockerfile
-      args:
-        PHP_VERSION: "8.3.35-cli-alpine"
-    image: php2shell-security-test:8.3.35-vulnerable
+      dockerfile: Dockerfile.vulnerable
+    image: php2shell-security-test:vulnerable
     container_name: php2shell-vulnerable
     ports:
       - "127.0.0.1:8081:8080"
@@ -16,15 +14,13 @@ services:
       - TEST_CASE=vulnerable_runtime
     restart: "no"
 
-  # Test Case B: Patched Runtime (PHP 8.3.36)
-  # Control Case: Verifies zero false-positive findings on patched release
+  # Test Case B: Patched Runtime Control Case (PHP 8.3.36)
+  # Expected: Zero CVE findings on fixed release
   patched-runtime:
     build:
       context: .
-      dockerfile: Dockerfile
-      args:
-        PHP_VERSION: "8.3.36-cli-alpine"
-    image: php2shell-security-test:8.3.36-patched
+      dockerfile: Dockerfile.patched
+    image: php2shell-security-test:patched
     container_name: php2shell-patched
     ports:
       - "127.0.0.1:8082:8080"
