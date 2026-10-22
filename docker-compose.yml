@@ -1,0 +1,34 @@
+services:
+  # Test Case A: Vulnerable Runtime (PHP 8.3.35)
+  # Targeted CVEs: CVE-2026-109618, CVE-2026-109619
+  vulnerable-runtime:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: "8.3.35-cli-alpine"
+    image: php2shell-security-test:8.3.35-vulnerable
+    container_name: php2shell-vulnerable
+    ports:
+      - "127.0.0.1:8081:8080"
+    environment:
+      - APP_ENV=test
+      - TEST_CASE=vulnerable_runtime
+    restart: "no"
+
+  # Test Case B: Patched Runtime (PHP 8.3.36)
+  # Control Case: Verifies zero false-positive findings on patched release
+  patched-runtime:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: "8.3.36-cli-alpine"
+    image: php2shell-security-test:8.3.36-patched
+    container_name: php2shell-patched
+    ports:
+      - "127.0.0.1:8082:8080"
+    environment:
+      - APP_ENV=test
+      - TEST_CASE=patched_runtime
+    restart: "no"

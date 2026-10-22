@@ -1,11 +1,17 @@
-**/__pycache__
+# Composer dependencies
+/vendor/
+composer.lock
 
-.homedir/*
-!.homedir/.bashrc
+# Test and scan artifacts
+scan-results/
+*.log
+*.tmp
+.phpunit.cache/
 
-.cache
-.config
-.coverage
-.local
-.pylint.d
-.venv
+# Environment files
+.env
+.env.local
+
+# Operating system artifacts
+.DS_Store
+Thumbs.db

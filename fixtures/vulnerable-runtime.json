@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "fixture_type": "expected_result_specification",
+  "notice": "This file is a test fixture defining expected scanner behavior. It is NOT raw scanner output.",
+  "test_case": "Test A — Vulnerable Runtime",
+  "runtime": {
+    "language": "php",
+    "branch": "8.3",
+    "version": "8.3.35",
+    "container_image": "php:8.3.35-cli-alpine",
+    "patched": false
+  },
+  "targeted_vulnerabilities": [
+    {
+      "cve_id": "CVE-2026-109618",
+      "name": "Interrupted initialization after memory exhaustion",
+      "upstream_advisory": "GHSA-w8hw-w9fx-j79w",
+      "cvss_v4": 9.2,
+      "severity": "CRITICAL",
+      "affected_range": "< 8.3.36",
+      "fixed_version": "8.3.36",
+      "source_reference": "https://securitylabs.datadoghq.com/articles/php2shell-critical-vulnerabilities-in-php/"
+    },
+    {
+      "cve_id": "CVE-2026-109619",
+      "name": "Stale state crosses request boundaries (Use-After-Free)",
+      "upstream_advisory": "GHSA-6wmf-4rv5-p3rp",
+      "cvss_v4": 9.2,
+      "severity": "CRITICAL",
+      "affected_range": "< 8.3.36",
+      "fixed_version": "8.3.36",
+      "source_reference": "https://securitylabs.datadoghq.com/articles/php2shell-critical-vulnerabilities-in-php/"
+    }
+  ],
+  "scanner_validation_matrix": {
+    "container_image_scanning": {
+      "status": "expected_detection",
+      "notes": "Scanners evaluating installed PHP binary or OS package metadata should flag both CVEs."
+    },
+    "repository_sca_manifest_only": {
+      "status": "inconclusive_or_unsupported",
+      "notes": "Standard Composer SCA scans application packages; the PHP runtime itself is not a Composer library."
+    },
+    "dynamic_runtime_inspection": {
+      "status": "expected_detection",
+      "notes": "Scanners observing active worker process version (8.3.35) should identify both vulnerabilities."
+    }
+  }
+}

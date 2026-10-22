@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "fixture_type": "expected_result_specification",
+  "notice": "This file is a test fixture defining expected scanner behavior. It is NOT raw scanner output.",
+  "test_case": "Test B — Patched Runtime Control Case",
+  "runtime": {
+    "language": "php",
+    "branch": "8.3",
+    "version": "8.3.36",
+    "container_image": "php:8.3.36-cli-alpine",
+    "patched": true
+  },
+  "remediated_vulnerabilities": [
+    {
+      "cve_id": "CVE-2026-109618",
+      "status": "remediated",
+      "first_fixed_release": "8.3.36",
+      "upstream_advisory": "GHSA-w8hw-w9fx-j79w"
+    },
+    {
+      "cve_id": "CVE-2026-109619",
+      "status": "remediated",
+      "first_fixed_release": "8.3.36",
+      "upstream_advisory": "GHSA-6wmf-4rv5-p3rp"
+    }
+  ],
+  "scanner_validation_matrix": {
+    "container_image_scanning": {
+      "status": "expected_clean",
+      "notes": "Neither CVE-2026-109618 nor CVE-2026-109619 should be flagged against PHP 8.3.36. Any finding indicates a false positive or outdated advisory database."
+    },
+    "repository_sca_manifest_only": {
+      "status": "expected_clean",
+      "notes": "No findings expected."
+    },
+    "dynamic_runtime_inspection": {
+      "status": "expected_clean",
+      "notes": "Running PHP 8.3.36 process is verified patched against both CVEs."
+    }
+  }
+}
