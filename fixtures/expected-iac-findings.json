@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "document_type": "iac_security_evaluation_benchmark",
+  "benchmark_title": "Pure Infrastructure-as-Code (IaC) Vulnerability Test Suite",
+  "version": "2.0.0",
+  "strict_criteria": {
+    "sast_vulnerabilities_allowed": 0,
+    "secret_leaks_allowed": 0,
+    "sca_vulnerabilities_allowed": 0,
+    "iac_misconfigurations_required": true
+  },
+  "modality_assertions": {
+    "sast": {
+      "status": "PASS",
+      "expected_count": 0,
+      "description": "Zero application source code vulnerabilities. No untrusted execution, injection, or malicious logic."
+    },
+    "secrets": {
+      "status": "PASS",
+      "expected_count": 0,
+      "description": "Zero hardcoded credentials, API keys, passwords, or tokens. Master passwords and credentials utilize runtime variables with no default secrets."
+    },
+    "sca": {
+      "status": "PASS",
+      "expected_count": 0,
+      "description": "Zero third-party dependency vulnerabilities. No vulnerable packages in manifest files."
+    },
+    "iac": {
+      "status": "DETECTED",
+      "expected_min_count": 50,
+      "description": "Rich set of intentional Infrastructure-as-Code misconfigurations covering Terraform, Kubernetes, CloudFormation, and Dockerfile."
+    }
+  },
+  "iac_findings_catalog": [
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/s3.tf",
+      "rule_id": "AVD-AWS-0086",
+      "checkov_id": "CKV_AWS_20",
+      "title": "S3 Bucket allows public read ACL",
+      "severity": "HIGH",
+      "resource": "aws_s3_bucket_acl.insecure_acl"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/s3.tf",
+      "rule_id": "AVD-AWS-0093",
+      "checkov_id": "CKV_AWS_53",
+      "title": "S3 Public Access Block Disabled",
+      "severity": "HIGH",
+      "resource": "aws_s3_bucket_public_access_block.disabled_public_access_block"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/s3.tf",
+      "rule_id": "AVD-AWS-0090",
+      "checkov_id": "CKV_AWS_21",
+      "title": "S3 Bucket Versioning Suspended",
+      "severity": "MEDIUM",
+      "resource": "aws_s3_bucket_versioning.insecure_versioning"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/s3.tf",
+      "rule_id": "AVD-AWS-0088",
+      "checkov_id": "CKV_AWS_19",
+      "title": "S3 Server-Side Encryption not enabled",
+      "severity": "HIGH",
+      "resource": "aws_s3_bucket.insecure_public_bucket"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/security_groups.tf",
+      "rule_id": "AVD-AWS-0107",
+      "checkov_id": "CKV_AWS_24",
+      "title": "Security Group allows unrestricted ingress to SSH (port 22) from 0.0.0.0/0",
+      "severity": "CRITICAL",
+      "resource": "aws_security_group.open_ssh_sg"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/security_groups.tf",
+      "rule_id": "AVD-AWS-0107",
+      "checkov_id": "CKV_AWS_25",
+      "title": "Security Group allows unrestricted ingress to RDP (port 3389) from 0.0.0.0/0",
+      "severity": "CRITICAL",
+      "resource": "aws_security_group.open_rdp_sg"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/security_groups.tf",
+      "rule_id": "AVD-AWS-0107",
+      "checkov_id": "CKV_AWS_260",
+      "title": "Security Group allows unrestricted ingress to all ports from 0.0.0.0/0",
+      "severity": "CRITICAL",
+      "resource": "aws_security_group.wide_open_all_traffic"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/ec2_ebs.tf",
+      "rule_id": "AVD-AWS-0028",
+      "checkov_id": "CKV_AWS_79",
+      "title": "EC2 IMDSv2 not enforced (http_tokens=optional)",
+      "severity": "HIGH",
+      "resource": "aws_instance.insecure_instance"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/ec2_ebs.tf",
+      "rule_id": "AVD-AWS-0012",
+      "checkov_id": "CKV_AWS_8",
+      "title": "EC2 instance associate_public_ip_address enabled",
+      "severity": "LOW",
+      "resource": "aws_instance.insecure_instance"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/ec2_ebs.tf",
+      "rule_id": "AVD-AWS-0026",
+      "checkov_id": "CKV_AWS_3",
+      "title": "EBS Volume unencrypted",
+      "severity": "HIGH",
+      "resource": "aws_ebs_volume.unencrypted_ebs"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/rds.tf",
+      "rule_id": "AVD-AWS-0180",
+      "checkov_id": "CKV_AWS_17",
+      "title": "RDS instance is publicly accessible",
+      "severity": "CRITICAL",
+      "resource": "aws_db_instance.insecure_db"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/rds.tf",
+      "rule_id": "AVD-AWS-0177",
+      "checkov_id": "CKV_AWS_16",
+      "title": "RDS instance storage encryption disabled",
+      "severity": "HIGH",
+      "resource": "aws_db_instance.insecure_db"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/rds.tf",
+      "rule_id": "AVD-AWS-0133",
+      "checkov_id": "CKV_AWS_133",
+      "title": "RDS automated backup retention period set to 0",
+      "severity": "MEDIUM",
+      "resource": "aws_db_instance.insecure_db"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/iam.tf",
+      "rule_id": "AVD-AWS-0057",
+      "checkov_id": "CKV_AWS_62",
+      "title": "IAM Policy allows wildcard administrative action and resource (*)",
+      "severity": "CRITICAL",
+      "resource": "aws_iam_policy.wildcard_admin_policy"
+    },
+    {
+      "framework": "Terraform (AWS)",
+      "target_file": "terraform/cloudtrail.tf",
+      "rule_id": "AVD-AWS-0014",
+      "checkov_id": "CKV_AWS_36",
+      "title": "CloudTrail log file validation disabled",
+      "severity": "HIGH",
+      "resource": "aws_cloudtrail.insecure_trail"
+    },
+    {
+      "framework": "Kubernetes",
+      "target_file": "kubernetes/privileged-pod.yaml",
+      "rule_id": "AVD-KSV-0017",
+      "checkov_id": "CKV_K8S_16",
+      "title": "Privileged container execution enabled",
+      "severity": "CRITICAL",
+      "resource": "Pod/iac-benchmark-privileged-pod"
+    },
+    {
+      "framework": "Kubernetes",
+      "target_file": "kubernetes/privileged-pod.yaml",
+      "rule_id": "AVD-KSV-0012",
+      "checkov_id": "CKV_K8S_23",
+      "title": "Container running as root (runAsUser=0)",
+      "severity": "HIGH",
+      "resource": "Pod/iac-benchmark-privileged-pod"
+    },
+    {
+      "framework": "Kubernetes",
+      "target_file": "kubernetes/privileged-pod.yaml",
+      "rule_id": "AVD-KSV-0004",
+      "checkov_id": "CKV_K8S_19",
+      "title": "Container sharing host network (hostNetwork=true)",
+      "severity": "HIGH",
+      "resource": "Pod/iac-benchmark-privileged-pod"
+    },
+    {
+      "framework": "Kubernetes",
+      "target_file": "kubernetes/privileged-pod.yaml",
+      "rule_id": "AVD-KSV-0005",
+      "checkov_id": "CKV_K8S_18",
+      "title": "Container sharing host PID (hostPID=true)",
+      "severity": "HIGH",
+      "resource": "Pod/iac-benchmark-privileged-pod"
+    },
+    {
+      "framework": "Kubernetes",
+      "target_file": "kubernetes/privileged-pod.yaml",
+      "rule_id": "AVD-KSV-0023",
+      "checkov_id": "CKV_K8S_8",
+      "title": "Host path root directory mounted inside container",
+      "severity": "HIGH",
+      "resource": "Pod/iac-benchmark-privileged-pod"
+    },
+    {
+      "framework": "Kubernetes",
+      "target_file": "kubernetes/insecure-deployment.yaml",
+      "rule_id": "AVD-KSV-0015",
+      "checkov_id": "CKV_K8S_10",
+      "title": "Missing CPU and Memory resource limits",
+      "severity": "MEDIUM",
+      "resource": "Deployment/iac-benchmark-insecure-deployment"
+    },
+    {
+      "framework": "Kubernetes",
+      "target_file": "kubernetes/rbac-insecure.yaml",
+      "rule_id": "AVD-KSV-0049",
+      "checkov_id": "CKV_K8S_49",
+      "title": "ClusterRole specifies wildcard permissions across all resources",
+      "severity": "HIGH",
+      "resource": "ClusterRole/iac-benchmark-overly-permissive-clusterrole"
+    },
+    {
+      "framework": "CloudFormation",
+      "target_file": "cloudformation/s3-public.yaml",
+      "rule_id": "AVD-AWS-0086",
+      "checkov_id": "CKV_AWS_20",
+      "title": "CloudFormation S3 Bucket allows PublicRead",
+      "severity": "HIGH",
+      "resource": "InsecureS3Bucket"
+    },
+    {
+      "framework": "CloudFormation",
+      "target_file": "cloudformation/security-group-open.yaml",
+      "rule_id": "AVD-AWS-0107",
+      "checkov_id": "CKV_AWS_24",
+      "title": "CloudFormation Security Group allows unrestricted SSH (port 22)",
+      "severity": "CRITICAL",
+      "resource": "InsecureSecurityGroup"
+    },
+    {
+      "framework": "Dockerfile",
+      "target_file": "Dockerfile",
+      "rule_id": "DS-0002",
+      "checkov_id": "CKV_DOCKER_3",
+      "title": "Container runs as root (missing USER instruction)",
+      "severity": "HIGH",
+      "resource": "Dockerfile"
+    },
+    {
+      "framework": "Dockerfile",
+      "target_file": "Dockerfile",
+      "rule_id": "DS-0026",
+      "checkov_id": "CKV_DOCKER_2",
+      "title": "Missing HEALTHCHECK instruction in Dockerfile",
+      "severity": "LOW",
+      "resource": "Dockerfile"
+    },
+    {
+      "framework": "Dockerfile",
+      "target_file": "Dockerfile",
+      "rule_id": "DS-0001",
+      "checkov_id": "CKV_DOCKER_7",
+      "title": "Base image uses 'latest' tag",
+      "severity": "MEDIUM",
+      "resource": "Dockerfile"
+    },
+    {
+      "framework": "Dockerfile",
+      "target_file": "Dockerfile",
+      "rule_id": "DS-0005",
+      "checkov_id": "CKV_DOCKER_1",
+      "title": "Dockerfile exposes port 22",
+      "severity": "HIGH",
+      "resource": "Dockerfile"
+    }
+  ]
+}

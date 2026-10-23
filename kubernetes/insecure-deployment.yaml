@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iac-benchmark-insecure-deployment
+  namespace: default
+  labels:
+    app: iac-benchmark-workload
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iac-benchmark-workload
+  template:
+    metadata:
+      labels:
+        app: iac-benchmark-workload
+    spec:
+      containers:
+        - name: app
+          image: alpine:3.20.3
+          command: ["/bin/sh", "-c", "sleep 3600"]
+          # Misconfiguration: No securityContext defined (runs as root, privilege escalation allowed)
+          # Misconfiguration: No resource requests or limits defined
+          # Misconfiguration: Missing liveness and readiness probes

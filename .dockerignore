@@ -1,9 +1,0 @@
-.git
-.gitignore
-.dockerignore
-README.md
-fixtures/
-scripts/
-scan-results/
-*.log
-*.md

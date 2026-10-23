@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'IaC Benchmark: Insecure S3 Bucket CloudFormation Template'
+
+Resources:
+  InsecureS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'iac-benchmark-cfn-public-bucket'
+      # Misconfiguration: Public read access control
+      AccessControl: PublicRead
+      # Misconfiguration: Public access block disabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      # Misconfiguration: Missing BucketEncryption (unencrypted S3 bucket)
+      # Misconfiguration: Missing LoggingConfiguration
+      # Misconfiguration: Missing VersioningConfiguration

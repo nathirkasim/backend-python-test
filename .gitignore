@@ -1,17 +1,16 @@
-# Composer dependencies
-/vendor/
-composer.lock
+# Terraform local state and cache
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+.terraform.lock.hcl
 
-# Test and scan artifacts
+# Scan outputs and test artifacts
 scan-results/
 *.log
 *.tmp
-.phpunit.cache/
 
-# Environment files
-.env
-.env.local
-
-# Operating system artifacts
+# Operating system files
 .DS_Store
 Thumbs.db
