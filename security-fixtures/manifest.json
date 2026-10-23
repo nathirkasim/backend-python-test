@@ -1,0 +1,12 @@
+{
+  "run_id": "tg-run-20261023-052652",
+  "managed_by": "TigerGate-Test-Framework",
+  "fixtures_seeded": [
+    "sast",
+    "sca",
+    "secrets",
+    "iac"
+  ],
+  "owner": "nathirkasim",
+  "synthetic_only": true
+}
